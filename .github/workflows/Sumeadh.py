@@ -23,7 +23,7 @@
 # 					 `validation_functions` ]
 
 ####################### IMPORT MODULES #######################
-import pandas 
+import pandas as pd
 import torch
 import numpy 
 ###################### Additional Imports ####################
