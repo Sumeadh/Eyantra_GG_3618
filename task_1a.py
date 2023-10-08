@@ -25,7 +25,7 @@
 ####################### IMPORT MODULES #######################
 import pandas 
 import torch
-import numpy 
+import numpy
 import sklearn.model_selection
 import sklearn.preprocessing
 import matplotlib.pyplot as plt
@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 You can import any additional modules that you require from 
 torch, matplotlib or sklearn. 
 You are NOT allowed to import any other libraries. It will 
-cause errors while running the executable
+cause errors while running the executable.0
 '''
 ##############################################################
 
@@ -79,10 +79,13 @@ def data_preprocessing(task_1a_dataframe):
 	#################	ADD YOUR CODE HERE	##################
 	
 	le = sklearn.preprocessing.LabelEncoder()
-	encoded_dataframe = task_1a_dataframe
-	encoded_dataframe = pandas.get_dummies (encoded_dataframe,columns=['Education','City','Gender','EverBenched'],dtype= int)
+	encoded_dataframe = task_1a_dataframe.copy()
+	encoded_dataframe['Education'] = le.fit_transform(encoded_dataframe['Education'])
 	encoded_dataframe['JoiningYear'] = le.fit_transform(encoded_dataframe['JoiningYear'])
+	encoded_dataframe['City'] = le.fit_transform(encoded_dataframe['City'])
 	encoded_dataframe['Age'] = le.fit_transform(encoded_dataframe['Age'])
+	encoded_dataframe['Gender'] = le.fit_transform(encoded_dataframe['Gender'])
+	encoded_dataframe['EverBenched'] = le.fit_transform(encoded_dataframe['EverBenched'])
 	
 	##########################################################
 	
@@ -115,12 +118,11 @@ def identify_features_and_targets(encoded_dataframe):
 	'''
 
 	#################	ADD YOUR CODE HERE	##################
-	
-	y_col = 'LeaveOrNot'
-	i = encoded_dataframe[y_col]
-	j = encoded_dataframe[encoded_dataframe.columns.drop(y_col)]
+	print(encoded_dataframe.info())
+	i = encoded_dataframe['LeaveOrNot']
+	j=encoded_dataframe.iloc[:,[0,1,2,3,4,5,6,7]]
 	features_and_targets = [j,i]
-
+	print(j.info())
 	##########################################################
 	return features_and_targets
 
@@ -193,16 +195,14 @@ class Salary_Predictor(torch.nn.Module):
 		Define the type and number of layers
 		'''
 		#######	ADD YOUR CODE HERE	#######
-		self.fc1 = torch.nn.Linear(14,512)
+		self.fc1 = torch.nn.Linear(8,512)
 		self.relu1=torch.nn.ReLU()
-		# self.dropout1 = torch.nn.Dropout(0.5)
+		
 		self.fc2 = torch.nn.Linear(512,512)
 		self.relu2=torch.nn.ReLU()
-		# self.dropout2 = torch.nn.Dropout(0.5)
-		self.fc3= torch.nn.Linear(512,1)
+		
 		self.fc3 = torch.nn.Linear(512, 256)  # Additional layer
 		self.relu3 = torch.nn.ReLU()
-		# self.dropout3 = torch.nn.Dropout(0.5)
 		self.fc4 = torch.nn.Linear(256, 1)
 		self.sigm = torch.nn.Sigmoid()
 		###################################	
@@ -214,13 +214,10 @@ class Salary_Predictor(torch.nn.Module):
 		#######	ADD YOUR CODE HERE	#######
 		x = self.fc1(x)
 		x = self.relu1(x)
-		# x = self.dropout1(x)
 		x = self.fc2(x)
 		x = self.relu2(x)
-		# x = self.dropout2(x)
 		x = self.fc3(x)
 		x = self.relu3(x)
-		# x = self.dropout3(x)
 		x = self.fc4(x)
 		x = self.sigm(x)
 		predicted_output = x
@@ -276,7 +273,7 @@ def model_optimizer(model):
 	optimizer = model_optimizer(model)
 	'''
 	#################	ADD YOUR CODE HERE	##################
-	optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+	optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 	##########################################################
 
 	return optimizer
@@ -300,7 +297,7 @@ def model_number_of_epochs():
 	number_of_epochs = model_number_of_epochs()
 	'''
 	#################	ADD YOUR CODE HERE	##################
-	number_of_epochs = 50
+	number_of_epochs = 512
 	##########################################################
 
 	return number_of_epochs
@@ -336,16 +333,18 @@ def training_function(model, number_of_epochs, tensors_and_iterable_training_dat
 			optimizer.zero_grad()
 
 			outputs = model(x)
+			
+			y = y.view(-1, 1)
 
 			loss = loss_function(outputs,y)
 			
 			
-			#loss.backward()
+			loss.backward()
 			
-			#running_loss += loss.item()
+			running_loss += loss.item()
 
 			optimizer.step()
-		print(f"Epoch {i + 1}/{number_of_epochs}, Loss: {running_loss / len(tensors_and_iterable_training_data[4])}")
+		#print(f"Epoch {i + 1}/{number_of_epochs}, Loss: {running_loss / len(tensors_and_iterable_training_data[4])}")
 	trained_model = model 
 	##########################################################
 
@@ -379,6 +378,8 @@ def validation_function(trained_model, tensors_and_iterable_training_data):
 	correct = 0
 	total = 0
 	with torch.no_grad():
+		x=tensors_and_iterable_training_data[1]
+		y=tensors_and_iterable_training_data[3]
 		for inputs, labels in tensors_and_iterable_training_data[4]:
 			outputs = model(inputs)
 			predicted = (outputs > 0.6).float()  # Assuming threshold for binary classification
