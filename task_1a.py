@@ -25,10 +25,8 @@
 ####################### IMPORT MODULES #######################
 import pandas 
 import torch
-import numpy
 import sklearn.model_selection
 import sklearn.preprocessing
-import matplotlib.pyplot as plt
 ###################### Additional Imports ####################
 '''
 You can import any additional modules that you require from 
@@ -118,11 +116,9 @@ def identify_features_and_targets(encoded_dataframe):
 	'''
 
 	#################	ADD YOUR CODE HERE	##################
-	print(encoded_dataframe.info())
 	i = encoded_dataframe['LeaveOrNot']
 	j=encoded_dataframe.iloc[:,[0,1,2,3,4,5,6,7]]
 	features_and_targets = [j,i]
-	print(j.info())
 	##########################################################
 	return features_and_targets
 
@@ -200,9 +196,10 @@ class Salary_Predictor(torch.nn.Module):
 		
 		self.fc2 = torch.nn.Linear(512,512)
 		self.relu2=torch.nn.ReLU()
-		
+
 		self.fc3 = torch.nn.Linear(512, 256)  # Additional layer
 		self.relu3 = torch.nn.ReLU()
+		
 		self.fc4 = torch.nn.Linear(256, 1)
 		self.sigm = torch.nn.Sigmoid()
 		###################################	
