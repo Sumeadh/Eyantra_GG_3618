@@ -1,0 +1,16 @@
+Team ID = 3618
+Trained weights drive link = "https://drive.google.com/drive/folders/1lM38cdtRiZE9KWfeGZfOzGVeRrAnWqG2?usp=sharing"
+
+###############################################################################
+'''
+Please write the complete steps taken by your team explaining how you completed Task 2B. It is adviced to be as elaborate as possible.
+
+1. In order to evaluate the given images, we have decided to use ResNet50 model and its weights.
+2. Before the training of the model we have used data augmentation steps like RandomHorizontalFlip, RandomGrayScale.
+3. As part of the preprocessing steps we have converted the image to size of (224, 224), and normalized it to the parameters given in the pytorch documentation
+4. We have imported the ResNet50 model from torchvision.models library
+5. The final layer is modified to produce 5 output features. Requires_grad is set to false to freeze the previous layers in place.
+6. We have used CrossEntropyLoss() as our loss function and Adam optimizer as optimizer function.
+7. The dataloader is then fed into the layer for training. We train in for 5 epochs with a learning rate of 0.01
+8. 
+

@@ -1,0 +1,14 @@
+Team ID = 3618
+Trained weights drive link = "https://drive.google.com/drive/folders/1FaffnNZ-2b_nY4Itm_5FxvMS8DiaMeQP?usp=sharing"    
+###############################################################################
+'''
+Please write the complete steps taken by your team explaining how you completed Task 2C. It is adviced to be as elaborate as possible.
+
+1. We first extracted the event images from the arena by hardcoding the locations of the images. 
+2. Since the location of the event images is fixed, we found out the exact starting pixel location of the events with the help of
+a image editing sotware like photoshop.
+3. Alternatively we can also try to use opencv functions to detect contours with an approximate size of 2500 pixels
+4. We then used the training weights from task_2c_model_training.py to classify the extracted images.
+5. The training file that we used is the same as the one we used in task_2b with a small change. We have experimented with learning rate
+scheduler in this one
+6. The detected image is returned as an integer by the model. So we have encoded it to the given variable names using a detect() function. 

@@ -6,7 +6,7 @@
 *        		===============================================
 *
 *  This script is to implement Task 1A of GeoGuide(GG) Theme (eYRC 2023-24).
-*  
+*  0
 *  This software is made available on an "AS IS WHERE IS BASIS".
 *  Licensee/end user indemnifies and will keep e-Yantra indemnified from
 *  any and all claim(s) that emanate from the use of the Software or 
@@ -15,23 +15,24 @@
 *****************************************************************************************
 '''
 
-# Team ID:			[ Team-ID ]
-# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:			GG_3618
+# Author List:		[ Sumeadh, Logithsurya, Sherwin Kumar, Satyak]
 # Filename:			task_1a.py
 # Functions:	    [`ideantify_features_and_targets`, `load_as_tensors`,
-# 					 `model_loss_function`, `model_optimizer`, `model_number_of_epochs`, `training_function`,
+# 					 `model_loss_function`, `model_optimizer`, `model_number_of_epochs`, `training_function`,capital of net
 # 					 `validation_functions` ]
 
 ####################### IMPORT MODULES #######################
-import pandas as pd
+import pandas 
 import torch
-import numpy 
+import sklearn.model_selection
+import sklearn.preprocessing
 ###################### Additional Imports ####################
 '''
 You can import any additional modules that you require from 
 torch, matplotlib or sklearn. 
 You are NOT allowed to import any other libraries. It will 
-cause errors while running the executable
+cause errors while running the executable.0
 '''
 ##############################################################
 
@@ -74,9 +75,18 @@ def data_preprocessing(task_1a_dataframe):
 	'''
 
 	#################	ADD YOUR CODE HERE	##################
-
+	le = sklearn.preprocessing.LabelEncoder()
+	# It is used for encoding categorical (non-numeric) labels into numerical labels
+	encoded_dataframe = task_1a_dataframe.copy()
+	encoded_dataframe['Education'] = le.fit_transform(encoded_dataframe['Education'])
+	encoded_dataframe['JoiningYear'] = le.fit_transform(encoded_dataframe['JoiningYear'])
+	encoded_dataframe['City'] = le.fit_transform(encoded_dataframe['City'])
+	encoded_dataframe['Age'] = le.fit_transform(encoded_dataframe['Age'])
+	encoded_dataframe['Gender'] = le.fit_transform(encoded_dataframe['Gender'])
+	encoded_dataframe['EverBenched'] = le.fit_transform(encoded_dataframe['EverBenched'])
+	
 	##########################################################
-
+	
 	return encoded_dataframe
 
 def identify_features_and_targets(encoded_dataframe):
@@ -106,9 +116,11 @@ def identify_features_and_targets(encoded_dataframe):
 	'''
 
 	#################	ADD YOUR CODE HERE	##################
-	
+	i = encoded_dataframe['LeaveOrNot'] #indexing using column name
+	j=encoded_dataframe.iloc[:,[0,1,2,3,4,5,6,7]]# iloc-->indexing in pandas frame using integers
+	print(i)
+	features_and_targets = [j,i]
 	##########################################################
-
 	return features_and_targets
 
 
@@ -147,12 +159,21 @@ def load_as_tensors(features_and_targets):
 	'''
 
 	#################	ADD YOUR CODE HERE	##################
-	
+	X_train, X_test, y_train, y_test =  sklearn.model_selection.train_test_split(features_and_targets[0], features_and_targets[1], test_size=0.33, random_state=1)
+	X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32)
+	print(X_train_tensor)
+	X_test_tensor = torch.tensor(X_test.values, dtype=torch.float32)
+	y_train_tensor = torch.tensor(y_train.values, dtype=torch.float32)
+	y_test_tensor = torch.tensor(y_test.values, dtype=torch.float32)
+	train_dataset = torch.utils.data.TensorDataset(X_train_tensor, y_train_tensor)
+	#combines them into a single set
+	train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True) 
+	#Converts the dataset into batches
+	tensors_and_iterable_training_data=[X_train_tensor,X_test_tensor,y_train_tensor,y_test_tensor,train_dataloader]
 	##########################################################
-
 	return tensors_and_iterable_training_data
 
-class Salary_Predictor():
+class Salary_Predictor(torch.nn.Module):
 	'''
 	Purpose:
 	---
@@ -174,7 +195,17 @@ class Salary_Predictor():
 		Define the type and number of layers
 		'''
 		#######	ADD YOUR CODE HERE	#######
+		self.fc1 = torch.nn.Linear(8,512)
+		self.relu1=torch.nn.ReLU()
 		
+		self.fc2 = torch.nn.Linear(512,512)
+		self.relu2=torch.nn.ReLU()
+
+		self.fc3 = torch.nn.Linear(512, 256)  # Additional layer
+		self.relu3 = torch.nn.ReLU()
+		
+		self.fc4 = torch.nn.Linear(256, 1)
+		self.sigm = torch.nn.Sigmoid()
 		###################################	
 
 	def forward(self, x):
@@ -182,7 +213,15 @@ class Salary_Predictor():
 		Define the activation functions
 		'''
 		#######	ADD YOUR CODE HERE	#######
-		
+		x = self.fc1(x)
+		x = self.relu1(x)
+		x = self.fc2(x)
+		x = self.relu2(x)
+		x = self.fc3(x)
+		x = self.relu3(x)
+		x = self.fc4(x)
+		x = self.sigm(x)
+		predicted_output = x
 		###################################
 
 		return predicted_output
@@ -209,7 +248,7 @@ def model_loss_function():
 	loss_function = model_loss_function()
 	'''
 	#################	ADD YOUR CODE HERE	##################
-	
+	loss_function = torch.nn.MSELoss()
 	##########################################################
 	
 	return loss_function
@@ -235,7 +274,7 @@ def model_optimizer(model):
 	optimizer = model_optimizer(model)
 	'''
 	#################	ADD YOUR CODE HERE	##################
-
+	optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 	##########################################################
 
 	return optimizer
@@ -259,7 +298,7 @@ def model_number_of_epochs():
 	number_of_epochs = model_number_of_epochs()
 	'''
 	#################	ADD YOUR CODE HERE	##################
-
+	number_of_epochs = 512
 	##########################################################
 
 	return number_of_epochs
@@ -289,7 +328,20 @@ def training_function(model, number_of_epochs, tensors_and_iterable_training_dat
 
 	'''	
 	#################	ADD YOUR CODE HERE	##################
-	
+	for i in range(number_of_epochs):
+		running_loss = 0.0
+		for x,y in tensors_and_iterable_training_data[4]:
+			optimizer.zero_grad()
+
+			outputs = model(x)
+			y = y.view(-1, 1) # for proper comparison with the training data
+			loss = loss_function(outputs,y)
+			loss.backward()
+			# PyTorch scalar tensor to convert it to a Python native number
+			running_loss += loss.item()
+			optimizer.step() # updates the parameters
+		#print(f"Epoch {i + 1}/{number_of_epochs}, Loss: {running_loss / len(tensors_and_iterable_training_data[4])}")
+	trained_model = model 
 	##########################################################
 
 	return trained_model
@@ -318,7 +370,19 @@ def validation_function(trained_model, tensors_and_iterable_training_data):
 
 	'''	
 	#################	ADD YOUR CODE HERE	##################
-
+	trained_model.eval()
+	correct = 0
+	total = 0
+	with torch.no_grad():
+		x=tensors_and_iterable_training_data[1]
+		y=tensors_and_iterable_training_data[3]
+		for inputs, labels in tensors_and_iterable_training_data[4]:
+			outputs = model(inputs)
+			predicted = (outputs > 0.6).float()  # Assuming threshold for binary classification
+			total += labels.size(0)
+			correct += (predicted == labels.view(-1, 1)).sum().item()  # Reshape labels if needed
+	model_accuracy = (correct / total )*100 
+	
 	##########################################################
 
 	return model_accuracy
@@ -362,7 +426,7 @@ if __name__ == "__main__":
 	trained_model = training_function(model, number_of_epochs, tensors_and_iterable_training_data, 
 					loss_function, optimizer)
 
-	# validating and obtaining accuracy
+	# validating and obtaining accuracy-ID ]
 	model_accuracy = validation_function(trained_model,tensors_and_iterable_training_data)
 	print(f"Accuracy on the test set = {model_accuracy}")
 
