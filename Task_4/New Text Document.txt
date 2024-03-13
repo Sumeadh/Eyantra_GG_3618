@@ -1,0 +1,18 @@
+Task 5A Documentation
+
+Image Processing:
+	Using Perspective transformation technique we transformed the skewd image into a flattened one. 
+	This eases out the event detection avoiding unwanted jitterings which we faced during contour detection methods
+
+Event Detection
+	Used resnet 152 for the ml model which enhanced event classification 
+	After detecting the event we printed out the detected event on top of the image using opencv
+
+Line Following Algorithm
+	The crux of the algorithm is such that the bot turns left and right contantly and if any of the sensor detects black, then it turns in the opposite direction.
+	The third sensor(center sensor) is used to follow the middle line and node detections.
+	We are planning to enhance the speed by using 5 sensors in the upcoming tasks
+
+Path planning algorithms 
+	We have successfully implemented the djkstra's alorithm for path planning
+	Additionally we used vector concepts to communicate on how the car should be turned in-order to move to it's subsequent node
